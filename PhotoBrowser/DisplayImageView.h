@@ -10,6 +10,12 @@
 
 @interface DisplayImageView : UIImageView<UIGestureRecognizerDelegate, UIScrollViewDelegate>
 
+//自定义长按图片的弹出的视图
+@property (nonatomic, strong) UIView * actionView;
+
 - (instancetype)initWithFrame:(CGRect)frame imageUrl:(NSString *)url;
+
+//保存图片到相册
+- (void)saveImage;
 
 @end

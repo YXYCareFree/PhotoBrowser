@@ -29,6 +29,9 @@
 
 @interface YXYPhotoBrowser : NSObject<UIScrollViewDelegate>
 
+//自定义长按图片的弹出的视图
+@property (nonatomic, strong) UIView * actionView;
+
 @property (nonatomic, assign) NSInteger currentImageIndex;
 
 @property (nonatomic, assign) NSInteger imageCount;
@@ -36,6 +39,9 @@
 @property (nonatomic, weak) id<YXYPhotoBrowserDelegate> delegate;
 
 - (instancetype)initWithImageUrlGroup:(NSArray *)urlArr delegate:(id)delegate;
+
+//保存图片到相册
+- (void)saveImage;
 
 - (void)show;
 

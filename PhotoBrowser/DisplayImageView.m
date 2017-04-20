@@ -24,7 +24,7 @@
     NSString * _src;//高清图的URL
     
     UIActivityIndicatorView * _indicatorView;
-    UIView * _actionView;
+    UIView * _ActionView;
     
     BOOL _showAction;
 }
@@ -61,9 +61,26 @@
     [self addGestureRecognizer:tap];
 }
 
+- (void)addGestures{
+    
+    UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismiss:)];
+    [_zoomScrollView addGestureRecognizer:tap];
+    
+    UITapGestureRecognizer * doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTap:)];
+    doubleTap.numberOfTapsRequired = 2;
+    [tap requireGestureRecognizerToFail:doubleTap];
+    [_tempImageView addGestureRecognizer:doubleTap];
+    
+    UILongPressGestureRecognizer * longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress)];
+    longPress.minimumPressDuration = 1;
+    [_tempImageView addGestureRecognizer:longPress];
+}
+
 - (void)show{
     
     [self prepareShow];
+    //添加操作手势
+    [self addGestures];
     
     [_zoomScrollView addSubview:_tempImageView];
     [keyWindow addSubview:_zoomScrollView];
@@ -105,18 +122,6 @@
     _tempImageView.clipsToBounds = YES;
     
     _zoomScrollView.contentSize = _tempImageView.frame.size;
-    
-    UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismiss:)];
-    [_zoomScrollView addGestureRecognizer:tap];
-    
-    UITapGestureRecognizer * doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTap:)];
-    doubleTap.numberOfTapsRequired = 2;
-    [tap requireGestureRecognizerToFail:doubleTap];
-    [_tempImageView addGestureRecognizer:doubleTap];
-    
-    UILongPressGestureRecognizer * longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress)];
-    longPress.minimumPressDuration = 1;
-    [_tempImageView addGestureRecognizer:longPress];
 }
 
 - (void)dismiss:(UITapGestureRecognizer *)tap{
@@ -138,14 +143,12 @@
         
     } completion:^(BOOL finished) {
         
+        _showAction = NO;
+        
         [tap.view removeFromSuperview];
-        [_actionView removeFromSuperview];
+        [_ActionView removeFromSuperview];
         
         _zoomScrollView = nil;
-        self.hidden = NO;
-        CGRect rect = [self convertRect:self.bounds toView:keyWindow];
-        
-        NSLog(@"self.frame%@, %@", NSStringFromCGRect(rect), NSStringFromCGRect(_tempImageView.frame));
     }];
 }
 
@@ -177,28 +180,39 @@
 #pragma mark--添加弹出视图的Action
 - (void)longPress{
     
-    if (!_actionView) {
-        _actionView = [[UIView alloc] initWithFrame:CGRectMake(0, kScreenHeigth, kScreenWidth, 44 * 3)];
-        _actionView.backgroundColor = [UIColor whiteColor];
-        
-        NSArray * titleArr = @[@"保存", @"发送", @"取消"];
-        for (int i = 0; i < 3; i++) {
+    if (!_ActionView) {
+
+        if (self.actionView) {
             
-            UIButton * btn = [[UIButton alloc] initWithFrame:CGRectMake(0, 44 * i, kScreenWidth, 43)];
-            [btn setTitle:titleArr[i] forState:UIControlStateNormal];
-            [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-            btn.tag = 100 + i;
-            [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
-            UIView * line = [[UIView alloc] initWithFrame:CGRectMake(0, 44 * i + 43, kScreenWidth, 1)];
-            line.backgroundColor = [UIColor grayColor];
-            [_actionView addSubview:line];
-            [_actionView addSubview:btn];
+            _ActionView = self.actionView;
+            
+        }else{
+            
+            _ActionView = [[UIView alloc] initWithFrame:CGRectMake(0, kScreenHeigth, kScreenWidth, 44 * 3)];
+            _ActionView.backgroundColor = [UIColor whiteColor];
+            
+            NSArray * titleArr = @[@"保存", @"发送", @"取消"];
+            for (int i = 0; i < 3; i++) {
+                
+                UIButton * btn = [[UIButton alloc] initWithFrame:CGRectMake(0, 44 * i, kScreenWidth, 43)];
+                [btn setTitle:titleArr[i] forState:UIControlStateNormal];
+                [btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+                btn.tag = 100 + i;
+                [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+                UIView * line = [[UIView alloc] initWithFrame:CGRectMake(0, 44 * i + 43, kScreenWidth, 1)];
+                line.backgroundColor = [UIColor grayColor];
+                [_ActionView addSubview:line];
+                [_ActionView addSubview:btn];
+            }
         }
-        [keyWindow addSubview:_actionView];
+    }
+    
+    if (!_showAction) {
+        [keyWindow addSubview:_ActionView];
     }
     
     [UIView animateWithDuration:.25 animations:^{
-        _actionView.frame = CGRectMake(0, kScreenHeigth - 44 * 3, kScreenWidth, 44 * 3);
+        _ActionView.frame = CGRectMake(0, kScreenHeigth - _ActionView.frame.size.height, kScreenWidth, _ActionView.frame.size.height);
     } completion:^(BOOL finished) {
         _showAction = finished;
     }];
@@ -217,7 +231,7 @@
 - (void)dismiss{
     
     [UIView animateWithDuration:.25 animations:^{
-        _actionView.frame = CGRectMake(0, kScreenHeigth, kScreenWidth, 44 *3);
+        _ActionView.frame = CGRectMake(0, kScreenHeigth, kScreenWidth, _ActionView.frame.size.height);
     } completion:^(BOOL finished) {
         _showAction = NO;
     }];

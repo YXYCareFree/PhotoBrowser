@@ -88,7 +88,6 @@
 
     }else{
         [self setZoomScale:2.0 animated:YES];
-
     }
 }
 

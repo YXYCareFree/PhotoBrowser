@@ -64,22 +64,30 @@
 
 - (void)createDisplayImageView{
     
+    
+    UIView * actionView = [[UIView alloc] initWithFrame:CGRectMake(0, kScreenHeigth, kScreenWidth, 100)];
+    actionView.backgroundColor = [UIColor brownColor];
     NSString * url = @"http://ar-staticresource.bj.bcebos.com/pollingimage/9b3249a5a19a438791c5dffe520d80ec/94m58PICK69_1024.jpg";
     
     DisplayImageView * imageView = [[DisplayImageView alloc] initWithFrame:CGRectMake(0, 300, kScreenWidth, 200) imageUrl:url];
 //    [imageView sd_setImageWithURL:[NSURL URLWithString:url] placeholderImage:[UIImage imageNamed:@"1.jpg"]];
     imageView.image = [UIImage imageNamed:@"1.jpg"];
+    imageView.actionView = actionView;
     [self.view addSubview:imageView];
 }
 
 - (void)displayImageView:(UITapGestureRecognizer *)tap{
     
+    
+    UIView * view = [[UIView alloc] initWithFrame:CGRectMake(0, kScreenHeigth, kScreenWidth, 200)];
+    view.backgroundColor = [UIColor redColor];
     NSArray * arr = @[
                       @"http://ar-staticresource.bj.bcebos.com/pollingimage/94m58PICK69_1024%20(18).jpg",
                       @"http://ar-staticresource.bj.bcebos.com/pollingimage/wt_9978.jpg",
                       @"http://ar-staticresource.bj.bcebos.com/pollingimage/e361172f5391473dba60c32752e51340/Desert.jpg"];
     YXYPhotoBrowser * browser = [[YXYPhotoBrowser alloc] initWithImageUrlGroup:arr delegate:self];
     browser.currentImageIndex = tap.view.tag - 100;
+    browser.actionView = view;
     [browser show];
 }
 
